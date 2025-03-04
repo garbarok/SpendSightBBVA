@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Excel files (to prevent accidental commit of bank statements)
+*.xls
+*.xlsx
+*.xlsm
+*.xlsb
+processed_transactions.xlsx
+bank_analysis_*.xlsx
+
+# Generated files
+charts/
+*.html
+*.log
+*.csv
+*.json
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Application specific
+# Ignore any downloaded or generated bank statements
+**/bank_statements/
+**/exports/
+**/output/
+**/temp/
+
+# Local configuration
+config.ini
+settings.json
+credentials.json
+.env.local
+.env.*.local 

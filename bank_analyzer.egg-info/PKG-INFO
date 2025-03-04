@@ -1,9 +1,0 @@
-Metadata-Version: 2.2
-Name: bank-analyzer
-Version: 0.1.0
-Requires-Python: >=3.8
-Requires-Dist: pandas>=2.0.0
-Requires-Dist: openpyxl>=3.1.0
-Requires-Dist: matplotlib>=3.8.0
-Dynamic: requires-dist
-Dynamic: requires-python
