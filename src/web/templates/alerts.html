@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}BBVAnalyzer - Alertas de Gastos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Alertas de Gastos</h4>
+        <a href="{{ url_for('analyze') }}" class="btn btn-light btn-sm">
+          <i class="bi bi-arrow-left"></i> Volver al Análisis
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Set New Alert Form -->
+          <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Configurar Nueva Alerta</h5>
+              </div>
+              <div class="card-body">
+                <form action="{{ url_for('expense_alerts') }}" method="post">
+                  <div class="mb-3">
+                    <label for="category" class="form-label">Categoría</label>
+                    <select class="form-select" id="category" name="category" required>
+                      <option value="" selected disabled>Selecciona una categoría</option>
+                      {% for category in categories %}
+                      <option value="{{ category }}">{{ category }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="threshold" class="form-label">Límite de Gasto (€)</label>
+                    <input type="number" class="form-control" id="threshold" name="threshold" step="0.01" min="0"
+                      required>
+                    <div class="form-text">Recibirás una alerta cuando el gasto en esta categoría supere este límite.
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Guardar Alerta</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Alerts -->
+          <div class="col-md-7">
+            <div class="card shadow-sm">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Alertas Configuradas</h5>
+              </div>
+              <div class="card-body">
+                {% if alerts %}
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Categoría</th>
+                        <th>Límite</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for category, threshold in alerts.items() %}
+                      <tr>
+                        <td>{{ category }}</td>
+                        <td>{{ threshold|format_currency }}</td>
+                        <td>
+                          <a href="{{ url_for('delete_alert', category=category) }}"
+                            class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                          </a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                  No tienes alertas configuradas. Usa el formulario para crear una nueva alerta.
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Triggered Alerts -->
+        {% if triggered_alerts %}
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="card shadow-sm border-danger">
+              <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Alertas Activadas</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Categoría</th>
+                        <th>Gasto Actual</th>
+                        <th>Límite</th>
+                        <th>Exceso</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for category, alert in triggered_alerts.items() %}
+                      <tr>
+                        <td>{{ category }}</td>
+                        <td class="text-danger fw-bold">{{ alert.current|format_currency }}</td>
+                        <td>{{ alert.threshold|format_currency }}</td>
+                        <td class="text-danger">+{{ alert.excess|format_currency }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,4 +1,6 @@
-# Bank Transaction Analyzer
+# BBVAnalyzer
+
+> 📊 A Python desktop application for analyzing BBVA bank statements. Easily track your expenses, visualize spending patterns with interactive charts, and manage multiple bank statements in one place. Perfect for personal finance management and expense tracking.
 
 A Python application to analyze bank transactions from Excel files. The application provides a graphical interface to visualize your transactions, with features like category grouping, monthly filtering, and interactive charts.
 
@@ -15,6 +17,9 @@ A Python application to analyze bank transactions from Excel files. The applicat
 - Export results to Excel
 - Detailed transaction views
 - Summary statistics
+- **Two application modes**:
+  - Desktop application (Tkinter-based UI)
+  - Web application (Flask-based, accessible from any device on your network)
 
 ## Prerequisites
 
@@ -50,55 +55,55 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Start the application:
+1. Start the application with the launcher (recommended):
 
 ```bash
 python src/main.py
 ```
 
-2. Using the application:
-   - Click "Add File" to load one or more Excel files
-   - The files should be in BBVA format with the following columns:
-     - ID
-     - F. Valor
-     - Fecha
-     - Concepto
-     - Movimiento
-     - Importe
-     - Divisa
-     - Disponible
-     - Divisa_2
-     - Observaciones
-   - Click "Analyze Transactions" to process the files
-   - Use the month filter to view transactions for specific months
-   - Navigate between tabs:
-     - "All Transactions": View detailed transaction list
-     - "Grouped by Category": See totals by category
-     - "Charts": Access interactive visualizations
-   - Double-click on a category in the grouped view to see its transactions
-   - Click column headers to sort data
-   - Use "Download Results" to save the analyzed data to Excel
+2. Choose your preferred application mode:
 
-## Charts
+   - **Desktop Application**: Traditional UI that runs locally
+   - **Web Application**: Runs a web server with a system tray icon, accessible from any device on your network
 
-The application provides three types of interactive charts:
+3. Alternatively, you can run the web application directly:
 
-1. **Category Distribution**:
+```bash
+python run_web_app.py
+```
 
-   - Pie chart showing the distribution of expenses by category
-   - Click on the legend to show/hide categories
-   - Hover for detailed information
+### Desktop Application
 
-2. **Category Analysis**:
+The desktop application provides a traditional UI with:
 
-   - Bar chart showing total amounts per category
-   - Line overlay showing number of transactions
-   - Dual Y-axes for amounts and counts
+- File management directly in the application
+- Multiple tabs for different views
+- Interactive charts embedded in the application
 
-3. **Monthly Overview**:
-   - Bar chart showing total amounts per month
-   - Line overlay showing transaction counts
-   - Chronological ordering
+### Web Application
+
+The web application offers:
+
+- Access from any device on your network (via browser)
+- Modern, responsive UI
+- System tray icon for quick access
+- Same functionality as the desktop version
+
+When you start the web application:
+
+1. A system tray icon will appear
+2. Your default browser will open to http://localhost:5000
+3. Other devices on your network can access it via http://your-ip-address:5000
+
+### Using Either Version
+
+Both versions allow you to:
+
+- Load and analyze Excel files
+- Filter transactions by month
+- View transactions by category
+- Generate interactive charts
+- Export results to Excel
 
 ## File Format
 
@@ -116,15 +121,15 @@ The application expects Excel files exported from BBVA online banking with the f
    - Check that the sheet name is "Informe BBVA"
    - Verify the data starts from row 5
 
-2. If charts don't open:
+2. If charts don't display:
 
-   - Ensure you have a default web browser installed
-   - Check that the 'charts' directory exists and is writable
+   - For desktop version: Ensure matplotlib is properly installed
+   - For web version: Check that your browser supports JavaScript and Plotly
 
-3. If the application doesn't start:
-   - Verify all dependencies are installed
-   - Check Python version (3.8 or higher required)
-   - Ensure you're in the correct directory when running the script
+3. If the web application is not accessible from other devices:
+   - Check your firewall settings
+   - Ensure you're using the correct IP address
+   - Verify port 5000 is not blocked
 
 ## Contributing
 

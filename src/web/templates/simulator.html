@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}BBVAnalyzer - Simulador de Inversiones{% endblock %}
+
+{% block head %}
+<style>
+  .result-card {
+    transition: all 0.3s ease;
+  }
+
+  .result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-container {
+    height: 400px;
+    margin-top: 20px;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    background: #0d6efd;
+  }
+
+  .form-range::-moz-range-thumb {
+    background: #0d6efd;
+  }
+
+  .form-range::-ms-thumb {
+    background: #0d6efd;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Simulador de Inversiones</h4>
+        <a href="{{ url_for('analyze') }}" class="btn btn-light btn-sm">
+          <i class="bi bi-arrow-left"></i> Volver al Análisis
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Simulator Form -->
+          <div class="col-md-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Parámetros de Simulación</h5>
+              </div>
+              <div class="card-body">
+                <form id="simulator-form">
+                  <div class="mb-3">
+                    <label for="initial-investment" class="form-label">Inversión Inicial (€)</label>
+                    <input type="number" class="form-control" id="initial-investment" value="1000" min="0" step="100">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="monthly-contribution" class="form-label">Aportación Mensual (€)</label>
+                    <input type="number" class="form-control" id="monthly-contribution" value="100" min="0" step="10">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="years" class="form-label">Años: <span id="years-value">10</span></label>
+                    <input type="range" class="form-range" id="years" min="1" max="40" value="10">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="interest-rate" class="form-label">Rentabilidad Anual: <span
+                        id="interest-value">7</span>%</label>
+                    <input type="range" class="form-range" id="interest-rate" min="1" max="15" value="7">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="investment-type" class="form-label">Tipo de Inversión</label>
+                    <select class="form-select" id="investment-type">
+                      <option value="conservative">Conservadora (3-5%)</option>
+                      <option value="moderate" selected>Moderada (5-8%)</option>
+                      <option value="aggressive">Agresiva (8-12%)</option>
+                    </select>
+                  </div>
+
+                  <button type="button" id="calculate-btn" class="btn btn-primary w-100">Calcular</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="col-md-8">
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="card result-card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Capital Final</h6>
+                    <p class="display-6 text-primary" id="final-amount">0€</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card result-card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Total Invertido</h6>
+                    <p class="display-6 text-success" id="total-invested">0€</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card result-card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Intereses Generados</h6>
+                    <p class="display-6 text-info" id="total-interest">0€</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="card shadow-sm">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Proyección de Crecimiento</h5>
+              </div>
+              <div class="card-body">
+                <div id="growth-chart" class="chart-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Education -->
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Educación Financiera</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">El Poder del Interés Compuesto</h5>
+                        <p class="card-text">El interés compuesto es considerado la "octava maravilla del mundo" por
+                          Albert Einstein. Permite que tus inversiones crezcan exponencialmente con el tiempo.</p>
+                        <p class="card-text text-muted"><small>Fuente: El Inversor Inteligente - Benjamin Graham</small>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">La Regla del 72</h5>
+                        <p class="card-text">Para estimar cuánto tardará tu dinero en duplicarse, divide 72 entre el
+                          porcentaje de rentabilidad anual. Por ejemplo, con un 8% anual, tu dinero se duplicará en
+                          aproximadamente 9 años.</p>
+                        <p class="card-text text-muted"><small>Fuente: Padre Rico, Padre Pobre - Robert Kiyosaki</small>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">Inversión Periódica</h5>
+                        <p class="card-text">Invertir regularmente pequeñas cantidades es más efectivo que esperar a
+                          tener una gran suma. Esta estrategia, conocida como "dollar-cost averaging", reduce el riesgo
+                          de timing del mercado.</p>
+                        <p class="card-text text-muted"><small>Fuente: Un Paseo Aleatorio por Wall Street - Burton
+                            Malkiel</small></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Plotly chart
+    const chartDiv = document.getElementById('growth-chart');
+    Plotly.newPlot(chartDiv, [{
+      x: [0],
+      y: [0],
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Capital Total'
+    }, {
+      x: [0],
+      y: [0],
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Capital Invertido'
+    }], {
+      title: 'Proyección de Crecimiento',
+      xaxis: { title: 'Años' },
+      yaxis: { title: 'Capital (€)' },
+      template: 'plotly_white'
+    });
+
+    // Update years and interest rate display
+    const yearsSlider = document.getElementById('years');
+    const yearsValue = document.getElementById('years-value');
+    yearsSlider.addEventListener('input', function () {
+      yearsValue.textContent = this.value;
+    });
+
+    const interestSlider = document.getElementById('interest-rate');
+    const interestValue = document.getElementById('interest-value');
+    interestSlider.addEventListener('input', function () {
+      interestValue.textContent = this.value;
+    });
+
+    // Investment type changes interest rate
+    const investmentType = document.getElementById('investment-type');
+    investmentType.addEventListener('change', function () {
+      switch (this.value) {
+        case 'conservative':
+          interestSlider.value = 4;
+          break;
+        case 'moderate':
+          interestSlider.value = 7;
+          break;
+        case 'aggressive':
+          interestSlider.value = 10;
+          break;
+      }
+      interestValue.textContent = interestSlider.value;
+    });
+
+    // Calculate button
+    const calculateBtn = document.getElementById('calculate-btn');
+    calculateBtn.addEventListener('click', calculateInvestment);
+
+    // Initial calculation
+    calculateInvestment();
+
+    function calculateInvestment() {
+      const initialInvestment = parseFloat(document.getElementById('initial-investment').value) || 0;
+      const monthlyContribution = parseFloat(document.getElementById('monthly-contribution').value) || 0;
+      const years = parseInt(document.getElementById('years').value) || 0;
+      const interestRate = parseFloat(document.getElementById('interest-rate').value) / 100 || 0;
+
+      // Calculate compound interest with monthly contributions
+      let balance = initialInvestment;
+      let totalContributions = initialInvestment;
+
+      const yearlyData = [{ year: 0, balance: balance, contributions: totalContributions }];
+
+      for (let year = 1; year <= years; year++) {
+        // Add monthly contributions for the year
+        for (let month = 1; month <= 12; month++) {
+          balance += monthlyContribution;
+          totalContributions += monthlyContribution;
+
+          // Apply monthly interest (annual rate / 12)
+          balance *= (1 + interestRate / 12);
+        }
+
+        yearlyData.push({
+          year: year,
+          balance: balance,
+          contributions: totalContributions
+        });
+      }
+
+      // Update results
+      document.getElementById('final-amount').textContent = balance.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+      document.getElementById('total-invested').textContent = totalContributions.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+      document.getElementById('total-interest').textContent = (balance - totalContributions).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+
+      // Update chart
+      const years_array = yearlyData.map(d => d.year);
+      const balance_array = yearlyData.map(d => d.balance);
+      const contributions_array = yearlyData.map(d => d.contributions);
+
+      Plotly.update(chartDiv, {
+        x: [years_array, years_array],
+        y: [balance_array, contributions_array]
+      }, {}, [0, 1]);
+    }
+  });
+</script>
+{% endblock %}

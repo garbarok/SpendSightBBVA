@@ -49,8 +49,6 @@ processed_transactions.xlsx
 bank_analysis_*.xlsx
 
 # Generated files
-charts/
-*.html
 *.log
 *.csv
 *.json

@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}BBVAnalyzer - Results{% endblock %}
+
+{% block head %}
+<style>
+  .nav-tabs .nav-link {
+    font-weight: 500;
+  }
+
+  .chart-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 15px;
+    background-color: white;
+  }
+
+  .summary-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .positive {
+    color: #198754;
+  }
+
+  .negative {
+    color: #dc3545;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Resultados del Análisis</h4>
+        <a href="{{ url_for('download_results') }}" class="btn btn-light btn-sm">
+          <i class="bi bi-download"></i> Descargar Excel
+        </a>
+      </div>
+      <div class="card-body">
+        <!-- Enhanced Filters -->
+        <form action="{{ url_for('filter_data') }}" method="post" class="mb-4">
+          <div class="row">
+            <div class="col-12 mb-3">
+              <h5><i class="bi bi-funnel"></i> Filtros</h5>
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label for="month" class="form-label">Mes</label>
+              <select class="form-select" id="month" name="month">
+                <option value="all" {% if not selected_month %}selected{% endif %}>Todos los meses</option>
+                {% for month_value, month_name in available_months %}
+                <option value="{{ month_value }}" {% if selected_month==month_value %}selected{% endif %}>
+                  {{ month_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label for="start_date" class="form-label">Fecha Inicio</label>
+              <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label for="end_date" class="form-label">Fecha Fin</label>
+              <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label for="category" class="form-label">Categoría</label>
+              <select class="form-select" id="category" name="category">
+                <option value="all" {% if not selected_category %}selected{% endif %}>Todas las categorías</option>
+                {% for category in categories %}
+                <option value="{{ category.name }}" {% if selected_category==category.name %}selected{% endif %}>
+                  {{ category.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-filter"></i> Aplicar Filtros
+              </button>
+              <a href="{{ url_for('analyze') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Limpiar Filtros
+              </a>
+
+              {% if filtered %}
+              <a href="{{ url_for('financial_report', month=selected_month) }}" class="btn btn-success ms-2">
+                <i class="bi bi-file-earmark-text"></i> Generar Informe Financiero
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="card summary-card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Ingresos</h5>
+                <p class="summary-value positive fs-3">{{ summary.income }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card summary-card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Gastos</h5>
+                <p class="summary-value negative fs-3">{{ summary.expenses }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card summary-card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Balance</h5>
+                <p
+                  class="summary-value fs-3 {% if summary.balance.startswith('-') %}negative{% else %}positive{% endif %}">
+                  {{ summary.balance }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="charts-tab" data-bs-toggle="tab" data-bs-target="#charts" type="button"
+              role="tab">
+              <i class="bi bi-pie-chart"></i> Gráficos
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button"
+              role="tab">
+              <i class="bi bi-tags"></i> Categorías
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions"
+              type="button" role="tab">
+              <i class="bi bi-list-ul"></i> Transacciones
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+          <!-- Charts Tab -->
+          <div class="tab-pane fade show active" id="charts" role="tabpanel">
+            <div class="row mt-4">
+              <div class="col-md-12 mb-4">
+                <h5>Distribución por Categoría (€)</h5>
+                <div class="chart-container" id="pie-chart"></div>
+              </div>
+
+              <div class="col-md-12 mb-4">
+                <h5>Análisis por Categoría</h5>
+                <div class="chart-container" id="bar-chart"></div>
+              </div>
+
+              <div class="col-md-12">
+                <h5>Resumen Mensual</h5>
+                <div class="chart-container" id="monthly-chart"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Tab -->
+          <div class="tab-pane fade" id="categories" role="tabpanel">
+            <div class="table-responsive mt-4">
+              <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Importe Total</th>
+                    <th>Nº Transacciones</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for category in categories %}
+                  <tr>
+                    <td><strong>{{ category.name }}</strong></td>
+                    <td class="fw-bold {% if '-' in category.total %}text-danger{% else %}text-success{% endif %}">
+                      {{ category.total }}
+                    </td>
+                    <td class="text-muted">{{ category.count }}</td>
+                    <td>
+                      <a href="{{ url_for('category_details', category=category.name) }}"
+                        class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> Ver Detalles
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Transactions Tab -->
+          <div class="tab-pane fade" id="transactions" role="tabpanel">
+            <div class="table-responsive mt-4">
+              <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Movimiento</th>
+                    <th>Importe</th>
+                    <th>Categoría</th>
+                    <th>Origen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for transaction in transactions %}
+                  <tr>
+                    <td>
+                      {% if transaction.Fecha is string %}
+                      {{ transaction.Fecha }}
+                      {% else %}
+                      {{ transaction.Fecha.strftime('%Y-%m-%d') if transaction.Fecha else 'N/A' }}
+                      {% endif %}
+                    </td>
+                    <td>{{ transaction.Concepto }}</td>
+                    <td>{{ transaction.Movimiento }}</td>
+                    <td class="fw-bold {% if transaction.Importe < 0 %}text-danger{% else %}text-success{% endif %}">
+                      {{ "%.2f"|format(transaction.Importe) }}€
+                    </td>
+                    <td>{{ transaction.Categoría }}</td>
+                    <td>{{ transaction.Source }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Load charts from JSON files
+    fetch('/static/charts/category_distribution.json')
+      .then(response => response.json())
+      .then(data => {
+        Plotly.newPlot('pie-chart', data.data, data.layout);
+      });
+
+    fetch('/static/charts/category_analysis.json')
+      .then(response => response.json())
+      .then(data => {
+        Plotly.newPlot('bar-chart', data.data, data.layout);
+      });
+
+    fetch('/static/charts/monthly_overview.json')
+      .then(response => response.json())
+      .then(data => {
+        Plotly.newPlot('monthly-chart', data.data, data.layout);
+      });
+  });
+</script>
+{% endblock %}

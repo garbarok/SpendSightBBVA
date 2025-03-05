@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}BBVAnalyzer - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-bank"></i> BBVAnalyzer</h4>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Welcome to BBVAnalyzer</h5>
+        <p class="card-text">
+          Upload your BBVA bank statements to analyze your transactions, categorize expenses, and visualize your
+          financial data.
+        </p>
+
+        <!-- File Upload Form -->
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="mb-4">
+          <div class="mb-3">
+            <label for="file" class="form-label">Select Excel Files</label>
+            <input class="form-control" type="file" id="file" name="file" multiple accept=".xlsx,.xls">
+            <div class="form-text">You can select multiple Excel files exported from BBVA.</div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-upload"></i> Upload Files
+          </button>
+        </form>
+
+        <!-- Loaded Files List -->
+        {% if files %}
+        <div class="card mt-4">
+          <div class="card-header">
+            <h5 class="mb-0">Loaded Files</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              {% for file in files %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ file.split('/')[-1] }}
+                <a href="{{ url_for('remove_file', filename=file.split('/')[-1]) }}" class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash"></i> Remove
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+
+            {% if files|length > 0 %}
+            <div class="mt-3">
+              <a href="{{ url_for('analyze') }}" class="btn btn-success">
+                <i class="bi bi-graph-up"></i> Analyze Transactions
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mt-5">
+  <div class="col-md-12">
+    <h3 class="text-center mb-4">Features</h3>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-graph-up text-primary" style="font-size: 2rem;"></i>
+        <h5 class="card-title mt-3">Transaction Analysis</h5>
+        <p class="card-text">Analyze your bank transactions with automatic categorization and detailed summaries.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-pie-chart text-primary" style="font-size: 2rem;"></i>
+        <h5 class="card-title mt-3">Interactive Charts</h5>
+        <p class="card-text">Visualize your spending patterns with interactive charts and graphs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-filter-circle text-primary" style="font-size: 2rem;"></i>
+        <h5 class="card-title mt-3">Filtering Options</h5>
+        <p class="card-text">Filter transactions by month and category to focus on specific data.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
