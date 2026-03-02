@@ -50,10 +50,18 @@ bank_analysis_*.xlsx
 
 # Generated files
 charts/
+logs/
 *.html
 *.log
 *.csv
 *.json
+
+# Database files
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
 
 # OS specific
 .DS_Store
